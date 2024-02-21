@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from torchvision import transforms as transform
 
 # from dataclasses import field
 
@@ -27,12 +28,15 @@ class CImageSize:
     HEIGHT: int = 450
 
 
-# @dataclass
-# class CImageParameters:
-#     IMAGE_SIZE: CImageSize = field(default_factory=CImageSize)
-#     COLOR_TYPE: CRGBType = field(default_factory=CRGBType)
+@dataclass
+class CTransformations:
+    m_imageTransform = transform.Resize((CImageSize.WIDTH, CImageSize.HEIGHT), interpolation=transform.InterpolationMode.BILINEAR)
+    m_labelTransform = transform.Resize((CImageSize.WIDTH, CImageSize.HEIGHT), interpolation=transform.InterpolationMode.NEAREST)
 
 
-# @dataclass
-# class CParameters:
-#     m_imageParameters: CImageParameters = field(default_factory=CImageParameters)
+@dataclass
+class CParameters:
+    m_trainingDataPath: str = r"C:\Git\AUDI_A2D2_dataset\training"
+    m_validationDataPath: str = r"C:\Git\AUDI_A2D2_dataset\validation"
+    m_transformations: CTransformations = field(default_factory=CTransformations)
+    m_imageSize: CImageSize = field(default_factory=CImageSize)
