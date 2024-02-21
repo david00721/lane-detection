@@ -23,8 +23,8 @@ class CGrayScaleType(CColorType):
 
 @dataclass
 class CImageSize:
-    WIDTH: int = 640
-    HEIGHT: int = 640
+    WIDTH: int = 450
+    HEIGHT: int = 450
 
 
 # @dataclass
