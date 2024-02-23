@@ -35,8 +35,26 @@ class CTransformations:
 
 
 @dataclass
+class CTrainingParameters:
+    m_batchSize: int = 16
+    m_isShuffle: bool = True
+    m_numberOfWorkers: int = 4
+    m_numberOfEpochs: int = 10
+    m_useWeights: bool = False
+    m_epochPeak: int = 2
+    m_learningRate: float = 0.01
+    m_learningRateWarmupRaito: float = 1.0
+    m_learningRateDecayPerEpoch: float = 1.0
+    m_logFrequency: int = 1
+    m_evaluationSize: int = 30
+    m_checkpointDirectory: str = r"C:\Git\lane-detection\src\checkpoints"
+    m_momentum: float = 0.95
+
+
+@dataclass
 class CParameters:
     m_trainingDataPath: str = r"C:\Git\AUDI_A2D2_dataset\training"
     m_validationDataPath: str = r"C:\Git\AUDI_A2D2_dataset\validation"
     m_transformations: CTransformations = field(default_factory=CTransformations)
     m_imageSize: CImageSize = field(default_factory=CImageSize)
+    m_trainingParameters: CTrainingParameters = field(default_factory=CTrainingParameters)

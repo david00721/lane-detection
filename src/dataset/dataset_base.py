@@ -14,6 +14,7 @@ class CDatasetBase(Dataset):
         self.m_transform: transforms.Resize = f_transform
         self.m_targetTransform: transforms.Resize = f_targetTransform
         self.m_RGB2IDs: dict[tuple[int, int, int], int] = self.convertClassesToIDs(f_reader.m_labelClasses)
+        self.m_numberOfClasses: int = len(self.m_RGB2IDs)
 
     def __len__(self) -> int:
         return len(self.m_dataPaths)
