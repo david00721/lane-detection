@@ -3,7 +3,7 @@ import json
 
 
 class CA2D2Reader:
-    def __init__(self, f_datasetRoot: str, f_classesPath: str = r"C:\Git\AUDI_A2D2_dataset\class_list.json") -> None:
+    def __init__(self, f_datasetRoot: str, f_classesPath: str, isLocalTraining: bool) -> None:
         self.m_datasetRoot: str = f_datasetRoot
         self.m_framePaths: list[str] = []
         self.m_labelPaths: list[str] = []
@@ -13,6 +13,10 @@ class CA2D2Reader:
 
         self.collectA2D2DataPaths()
         self.loadClasses()
+
+        if isLocalTraining:
+            self.m_framePaths = self.m_framePaths[:100]
+            self.m_labelPaths = self.m_labelPaths[:100]
 
     def collectA2D2DataPaths(self) -> None:
         """Collect image paths and label paths from the A2D2 dataset."""

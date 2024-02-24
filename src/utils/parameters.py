@@ -1,7 +1,21 @@
 from dataclasses import dataclass, field
 from torchvision import transforms as transform
 
-# from dataclasses import field
+
+FilteredLabels: list = [
+    "Background",
+    "Solid line",
+    # "Non-drivable street",
+    "Zebra crossing",
+    "RD restricted area",
+    "Drivable cobblestone",
+    # "Slow drive area",
+    # "Parking area",
+    # "Painted driv. instr.",
+    "Traffic guide obj.",
+    "Dashed line",
+    "RD normal street",
+]
 
 
 @dataclass
@@ -29,12 +43,6 @@ class CImageSize:
 
 
 @dataclass
-class CTransformations:
-    m_imageTransform = transform.Resize((CImageSize.WIDTH, CImageSize.HEIGHT), interpolation=transform.InterpolationMode.BILINEAR)
-    m_labelTransform = transform.Resize((CImageSize.WIDTH, CImageSize.HEIGHT), interpolation=transform.InterpolationMode.NEAREST)
-
-
-@dataclass
 class CTrainingParameters:
     m_batchSize: int = 16
     m_isShuffle: bool = True
@@ -53,8 +61,11 @@ class CTrainingParameters:
 
 @dataclass
 class CParameters:
+    m_isLocalTraining: bool = True
     m_trainingDataPath: str = r"C:\Git\AUDI_A2D2_dataset\training"
     m_validationDataPath: str = r"C:\Git\AUDI_A2D2_dataset\validation"
-    m_transformations: CTransformations = field(default_factory=CTransformations)
+    m_classListPath: str = r"C:\Git\AUDI_A2D2_dataset\class_list.json"
+    m_transformation = transform.Compose([transform.Resize((CImageSize.WIDTH, CImageSize.HEIGHT))])
     m_imageSize: CImageSize = field(default_factory=CImageSize)
     m_trainingParameters: CTrainingParameters = field(default_factory=CTrainingParameters)
+    m_numberOfClasses: int = len(FilteredLabels)

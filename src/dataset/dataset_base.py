@@ -3,18 +3,18 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.io import read_image, image
 
-from src.utils.parameters import CImageSize
+from src.utils.parameters import CImageSize, FilteredLabels
 from src.reader.reader_base import CA2D2Reader
 
 
 class CDatasetBase(Dataset):
 
-    def __init__(self, f_reader: CA2D2Reader, f_transform: transforms.Resize, f_targetTransform: transforms.Resize) -> None:
+    def __init__(self, f_reader: CA2D2Reader, f_transformation: transforms.Compose) -> None:
         self.m_dataPaths: list[tuple[str, str]] = list(zip(f_reader.m_framePaths, f_reader.m_labelPaths))
-        self.m_transform: transforms.Resize = f_transform
-        self.m_targetTransform: transforms.Resize = f_targetTransform
-        self.m_RGB2IDs: dict[tuple[int, int, int], int] = self.convertClassesToIDs(f_reader.m_labelClasses)
-        self.m_numberOfClasses: int = len(self.m_RGB2IDs)
+        self.m_transformation: transforms.Compose = f_transformation
+        self.m_filteredClasses: dict[str, int] = {k: v for k, v in f_reader.m_labelClasses.items() if v in FilteredLabels}
+        self.m_RGB2IDs: dict[tuple[int, int, int], int] = self.convertClassesToIDs(self.m_filteredClasses)
+        self.m_numberOfClasses: int = len(self.m_filteredClasses)
 
     def __len__(self) -> int:
         return len(self.m_dataPaths)
@@ -23,14 +23,14 @@ class CDatasetBase(Dataset):
         framePath, labelPath = self.m_dataPaths[f_index]
 
         frame = read_image(framePath, mode=image.ImageReadMode.RGB)
-        frame = self.m_transform(frame)
+        frame = self.m_transformation(frame)
 
         label = read_image(labelPath, mode=image.ImageReadMode.RGB)
-        label = self.m_targetTransform(label)
+        label = self.m_transformation(label)
 
         id_map = CDatasetBase.convertLabelToClassIDMap(label, self.m_RGB2IDs)
 
-        return torch.div(frame, 255), id_map.type(torch.int64)
+        return torch.div(frame, 255), id_map.type(torch.int64)  # torch.nn.functional.one_hot()
 
     @staticmethod
     def convertHexaClassColorsToRBG(f_labelClasses: dict[int, int]) -> dict[str, tuple[int, int, int]]:
