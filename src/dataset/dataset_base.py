@@ -43,7 +43,7 @@ class CDatasetBase(Dataset):
 
     @staticmethod
     def convertLabelToClassIDMap(f_label: torch.Tensor, f_RGB2IDs: dict[tuple[int, int, int], int]) -> torch.Tensor:
-        mask = torch.zeros(CImageSize.WIDTH, CImageSize.HEIGHT)
+        mask = torch.zeros(CImageSize.HEIGHT, CImageSize.WIDTH)
         for rgb_code, class_id in f_RGB2IDs.items():
             color_mask = f_label == torch.Tensor(rgb_code).reshape([3, 1, 1])
             seg_mask = color_mask.sum(dim=0) == 3

@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 from torchvision import transforms as transform
 
@@ -19,27 +20,9 @@ FilteredLabels: list = [
 
 
 @dataclass
-class CColorType:
-    ID: str
-    CHANNELS: int
-
-
-@dataclass
-class CRGBType(CColorType):
-    ID: str = "RGB"
-    CHANNELS: int = 3
-
-
-@dataclass
-class CGrayScaleType(CColorType):
-    ID: str = "L"
-    CHANNELS: int = 1
-
-
-@dataclass
 class CImageSize:
-    WIDTH: int = 450
-    HEIGHT: int = 450
+    WIDTH: int = 400
+    HEIGHT: int = 225
 
 
 @dataclass
@@ -55,17 +38,18 @@ class CTrainingParameters:
     m_learningRateDecayPerEpoch: float = 1.0
     m_logFrequency: int = 1
     m_evaluationSize: int = 30
-    m_checkpointDirectory: str = r"C:\Git\lane-detection\src\checkpoints"
+    m_checkpointDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "checkpoints")
+    m_predictionsDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "predictions")
     m_momentum: float = 0.95
 
 
 @dataclass
 class CParameters:
-    m_isLocalTraining: bool = True
-    m_trainingDataPath: str = r"C:\Git\AUDI_A2D2_dataset\training"
-    m_validationDataPath: str = r"C:\Git\AUDI_A2D2_dataset\validation"
-    m_classListPath: str = r"C:\Git\AUDI_A2D2_dataset\class_list.json"
-    m_transformation = transform.Compose([transform.Resize((CImageSize.WIDTH, CImageSize.HEIGHT))])
+    m_datasetRoot: str = "C:/Git/AUDI_A2D2_dataset"
+    m_trainingDataPath: str = os.path.join(m_datasetRoot, "training")
+    m_validationDataPath: str = os.path.join(m_datasetRoot, "validation")
+    m_classListPath: str = os.path.join(m_datasetRoot, "class_list.json")
+    m_transformation = transform.Compose([transform.Resize((CImageSize.HEIGHT, CImageSize.WIDTH))])
     m_imageSize: CImageSize = field(default_factory=CImageSize)
     m_trainingParameters: CTrainingParameters = field(default_factory=CTrainingParameters)
     m_numberOfClasses: int = len(FilteredLabels)
