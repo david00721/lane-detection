@@ -1,38 +1,55 @@
-from dataclasses import dataclass
-
-# from dataclasses import field
-
-
-@dataclass
-class CColorType:
-    ID: str
-    CHANNELS: int
+import os
+from dataclasses import dataclass, field
+from torchvision import transforms as transform
 
 
-@dataclass
-class CRGBType(CColorType):
-    ID: str = "RGB"
-    CHANNELS: int = 3
-
-
-@dataclass
-class CGrayScaleType(CColorType):
-    ID: str = "L"
-    CHANNELS: int = 1
+FilteredLabels: list = [
+    "Background",
+    "Solid line",
+    # "Non-drivable street",
+    "Zebra crossing",
+    "RD restricted area",
+    "Drivable cobblestone",
+    # "Slow drive area",
+    # "Parking area",
+    # "Painted driv. instr.",
+    "Traffic guide obj.",
+    "Dashed line",
+    "RD normal street",
+]
 
 
 @dataclass
 class CImageSize:
-    WIDTH: int = 640
-    HEIGHT: int = 640
+    WIDTH: int = 400
+    HEIGHT: int = 225
 
 
-# @dataclass
-# class CImageParameters:
-#     IMAGE_SIZE: CImageSize = field(default_factory=CImageSize)
-#     COLOR_TYPE: CRGBType = field(default_factory=CRGBType)
+@dataclass
+class CTrainingParameters:
+    m_batchSize: int = 16
+    m_isShuffle: bool = True
+    m_numberOfWorkers: int = 4
+    m_numberOfEpochs: int = 10
+    m_useWeights: bool = False
+    m_epochPeak: int = 2
+    m_learningRate: float = 0.01
+    m_learningRateWarmupRaito: float = 1.0
+    m_learningRateDecayPerEpoch: float = 1.0
+    m_logFrequency: int = 1
+    m_evaluationSize: int = 30
+    m_checkpointDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "checkpoints")
+    m_predictionsDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "predictions")
+    m_momentum: float = 0.95
 
 
-# @dataclass
-# class CParameters:
-#     m_imageParameters: CImageParameters = field(default_factory=CImageParameters)
+@dataclass
+class CParameters:
+    m_datasetRoot: str = "C:/Git/AUDI_A2D2_dataset"
+    m_trainingDataPath: str = os.path.join(m_datasetRoot, "training")
+    m_validationDataPath: str = os.path.join(m_datasetRoot, "validation")
+    m_classListPath: str = os.path.join(m_datasetRoot, "class_list.json")
+    m_transformation = transform.Compose([transform.Resize((CImageSize.HEIGHT, CImageSize.WIDTH))])
+    m_imageSize: CImageSize = field(default_factory=CImageSize)
+    m_trainingParameters: CTrainingParameters = field(default_factory=CTrainingParameters)
+    m_numberOfClasses: int = len(FilteredLabels)
