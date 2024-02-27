@@ -27,7 +27,7 @@ class CImageSize:
 
 @dataclass
 class CTrainingParameters:
-    m_batchSize: int = 16
+    m_batchSize: int = 32
     m_isShuffle: bool = True
     m_numberOfWorkers: int = 4
     m_numberOfEpochs: int = 10
@@ -41,6 +41,8 @@ class CTrainingParameters:
     m_checkpointDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "checkpoints")
     m_predictionsDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "predictions")
     m_momentum: float = 0.95
+    m_trainingFrameNumber: int = None
+    m_validationFrameNumber: int = None
 
 
 @dataclass
@@ -49,7 +51,7 @@ class CParameters:
     m_trainingDataPath: str = os.path.join(m_datasetRoot, "training")
     m_validationDataPath: str = os.path.join(m_datasetRoot, "validation")
     m_classListPath: str = os.path.join(m_datasetRoot, "class_list.json")
-    m_transformation = transform.Compose([transform.Resize((CImageSize.HEIGHT, CImageSize.WIDTH))])
+    m_transformation = transform.Compose([transform.Resize((CImageSize.HEIGHT, CImageSize.WIDTH), antialias=True)])
     m_imageSize: CImageSize = field(default_factory=CImageSize)
     m_trainingParameters: CTrainingParameters = field(default_factory=CTrainingParameters)
     m_numberOfClasses: int = len(FilteredLabels)

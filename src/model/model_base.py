@@ -46,8 +46,12 @@ class CModelBase:
         return f_dataset(reader, self.m_parameters.m_transformation)
 
     def loadDatasets(self) -> None:
-        self.m_trainingDataset = self.loadSingleDataset(CTrainingReader, CTrainingDataset, self.m_parameters.m_trainingDataPath, 50)
-        self.m_validationDataset = self.loadSingleDataset(CValidationReader, CValidationDataset, self.m_parameters.m_validationDataPath, 5)
+        self.m_trainingDataset = self.loadSingleDataset(
+            CTrainingReader, CTrainingDataset, self.m_parameters.m_trainingDataPath, self.m_parameters.m_trainingParameters.m_trainingFrameNumber
+        )
+        self.m_validationDataset = self.loadSingleDataset(
+            CValidationReader, CValidationDataset, self.m_parameters.m_validationDataPath, self.m_parameters.m_trainingParameters.m_validationFrameNumber
+        )
 
     def createDataLoaders(self) -> None:
         trainingParameters = self.m_parameters.m_trainingParameters
