@@ -30,7 +30,7 @@ class CDatasetBase(Dataset):
 
         id_map = CDatasetBase.convertLabelToClassIDMap(label, self.m_RGB2IDs)
 
-        return torch.div(frame, 255), id_map.type(torch.int64)  # torch.nn.functional.one_hot()
+        return torch.div(frame, 255), torch.nn.functional.one_hot(id_map.long())
 
     @staticmethod
     def convertHexaClassColorsToRBG(f_labelClasses: dict[int, int]) -> dict[str, tuple[int, int, int]]:

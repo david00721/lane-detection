@@ -1,41 +1,22 @@
 import os
 import sys
-import json
+from tqdm import tqdm
+from PIL import Image
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-import torch
-from tqdm import tqdm
-from torchvision.io import read_image, image
-from torchvision import transforms as transform
-
-from parameters import CParameters, FilteredLabels
-from src.dataset.dataset_base import CDatasetBase
+from parameters import CParameters, CImageSize
 
 
-def preprocessFrames(
-    f_originalPath: str, f_targetPath: str, f_transformation: transform.Compose, f_isLabel: bool, f_RGB2IDs: dict[tuple[int, int, int], int] = None
-) -> None:
+def preprocessFrames(f_originalPath: str, f_targetPath: str) -> None:
     l_cameraImages = sorted([img for img in os.listdir(f_originalPath) if os.path.splitext(img)[1].lower() in [".jpg", ".jpeg", ".png"]])
     for filename in tqdm(l_cameraImages):
-        img = read_image(os.path.join(f_originalPath, filename), mode=image.ImageReadMode.RGB)
-        img = f_transformation(img)
-
-        if f_isLabel:
-            id_map = CDatasetBase.convertLabelToClassIDMap(img, f_RGB2IDs)
-            torch.save(id_map.type(torch.int64), os.path.join(f_targetPath, filename))
-            continue
-
-        torch.save(torch.div(img, 255), os.path.join(f_targetPath, filename))
+        img = Image.open(os.path.join(f_originalPath, filename)).resize((CImageSize.WIDTH, CImageSize.HEIGHT), Image.NEAREST)
+        img.save(os.path.join(f_targetPath, filename))
 
 
 def main() -> None:
     parameters = CParameters()
-
-    with open(parameters.m_classListPath, "r") as json_file:
-        all_classes = json.load(json_file)
-
-    RGB2IDs = CDatasetBase.convertClassesToIDs({k: v for k, v in all_classes.items() if v in FilteredLabels})
 
     preprocessedDataPath = os.path.join(parameters.m_datasetRoot, "preprocessed")
     originalDataPath = os.path.join(parameters.m_datasetRoot, "training")
@@ -48,14 +29,18 @@ def main() -> None:
         print(f"Iteration: {idx}\nPreprocessing {sceneFolder}")
         os.makedirs(os.path.join(preprocessedDataPath, sceneFolder), exist_ok=True)
 
-        camera = os.path.join(preprocessedDataPath, sceneFolder, "camera", "cam_front_center")
-        label = os.path.join(preprocessedDataPath, sceneFolder, "label", "cam_front_center")
+        for cam in ["cam_front_center", "cam_front_right", "cam_front_left", "cam_rear_center"]:
+            if not os.path.exists(os.path.join(originalDataPath, sceneFolder, "camera", cam)):
+                continue
 
-        os.makedirs(camera, exist_ok=True)
-        os.makedirs(label, exist_ok=True)
+            camera = os.path.join(preprocessedDataPath, sceneFolder, "camera", cam)
+            label = os.path.join(preprocessedDataPath, sceneFolder, "label", cam)
 
-        preprocessFrames(os.path.join(originalDataPath, sceneFolder, "camera", "cam_front_center"), camera, parameters.m_transformation, False)
-        preprocessFrames(os.path.join(originalDataPath, sceneFolder, "label", "cam_front_center"), label, parameters.m_transformation, True, RGB2IDs)
+            os.makedirs(camera, exist_ok=True)
+            os.makedirs(label, exist_ok=True)
+
+            preprocessFrames(os.path.join(originalDataPath, sceneFolder, "camera", cam), camera)
+            preprocessFrames(os.path.join(originalDataPath, sceneFolder, "label", cam), label)
 
 
 if __name__ == "__main__":

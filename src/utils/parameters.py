@@ -21,8 +21,8 @@ FilteredLabels: list = [
 
 @dataclass
 class CImageSize:
-    WIDTH: int = 400
-    HEIGHT: int = 225
+    WIDTH: int = 416
+    HEIGHT: int = 224
 
 
 @dataclass
@@ -41,8 +41,8 @@ class CTrainingParameters:
     m_checkpointDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "checkpoints")
     m_predictionsDirectory: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "predictions")
     m_momentum: float = 0.95
-    m_trainingFrameNumber: int = None
-    m_validationFrameNumber: int = None
+    m_trainingFrameNumber: int = 1000
+    m_validationFrameNumber: int = 50
 
 
 @dataclass
