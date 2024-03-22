@@ -46,8 +46,12 @@ class CModelBase:
         return f_dataset(reader, self.m_parameters.m_transformation)
 
     def loadDatasets(self) -> None:
-        self.m_trainingDataset = self.loadSingleDataset(CTrainingReader, CTrainingDataset, self.m_parameters.m_trainingDataPath, 50)
-        self.m_validationDataset = self.loadSingleDataset(CValidationReader, CValidationDataset, self.m_parameters.m_validationDataPath, 5)
+        self.m_trainingDataset = self.loadSingleDataset(
+            CTrainingReader, CTrainingDataset, self.m_parameters.m_trainingDataPath, self.m_parameters.m_trainingParameters.m_trainingFrameNumber
+        )
+        self.m_validationDataset = self.loadSingleDataset(
+            CValidationReader, CValidationDataset, self.m_parameters.m_validationDataPath, self.m_parameters.m_trainingParameters.m_validationFrameNumber
+        )
 
     def createDataLoaders(self) -> None:
         trainingParameters = self.m_parameters.m_trainingParameters
@@ -88,15 +92,15 @@ class CModelBase:
 
             for i, batch in enumerate(tqdm(self.m_trainingLoader)):
                 self.m_model.train()
-                inputs, masks = batch[0].to(device), batch[1].to(device)
+                inputs, masks = batch[0].to(device), batch[1].to(device).argmax(dim=3)
                 self.m_optimizer.zero_grad()
 
                 with torch.cuda.amp.autocast(enabled=self.m_amp):
                     outputs = self.m_model(inputs)
-                    training_loss = self.m_lossFunction(outputs["out"], masks.long())
-                    _, predicted = torch.max(outputs["out"], 1)
+                    training_loss = self.m_lossFunction(outputs, masks)
+                    _, predicted = torch.max(outputs, 1)
                     total += masks.nelement()
-                    correct += (predicted == masks.long()).sum().item()
+                    correct += (predicted == masks).sum().item()
 
                 self.m_scaler.scale(training_loss).backward()
                 self.m_scaler.step(self.m_optimizer)
@@ -109,10 +113,10 @@ class CModelBase:
                     self.m_model.eval()
                     with torch.no_grad():
                         for j, batch in enumerate(self.m_validationLoader):
-                            inputs, masks = batch[0].to(device), batch[1].to(device)
+                            inputs, masks = batch[0].to(device), batch[1].to(device).argmax(dim=3)
                             outputs = self.m_model(inputs)
-                            val_loss = self.m_lossFunction(outputs["out"], masks)
-                            _, predicted = torch.max(outputs["out"], 1)
+                            val_loss = self.m_lossFunction(outputs, masks)
+                            _, predicted = torch.max(outputs, 1)
                             total += masks.nelement()
                             correct += (predicted == masks).sum().item()
                             val_losses.append(val_loss)

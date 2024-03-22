@@ -1,4 +1,5 @@
 import torch
+import segmentation_models_pytorch as smp
 
 from src.utils.parameters import CParameters
 from src.model.model_base import CModelBase
@@ -9,9 +10,11 @@ class CSegmentationModel(CModelBase):
         super().__init__(f_parameters)
         self.m_numberOfClasses: int = f_parameters.m_numberOfClasses
 
-        self.m_model = torch.hub.load(
-            "pytorch/vision:v0.9.1", "deeplabv3_mobilenet_v3_large", weights=f_parameters.m_trainingParameters.m_useWeights, num_classes=self.m_numberOfClasses
-        )
+        # self.m_model = torch.hub.load(
+        #     "pytorch/vision:v0.9.1", "deeplabv3_mobilenet_v3_large", weights=f_parameters.m_trainingParameters.m_useWeights, num_classes=self.m_numberOfClasses
+        # )
+
+        self.m_model = smp.Unet("resnet50", in_channels=3, classes=f_parameters.m_numberOfClasses, encoder_weights="imagenet")
 
         self.m_lossFunction = torch.nn.CrossEntropyLoss()
         self.m_optimizer = torch.optim.SGD(
