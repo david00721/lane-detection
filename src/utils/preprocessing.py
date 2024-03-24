@@ -5,13 +5,13 @@ from PIL import Image
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from parameters import CParameters, CImageSize
+from parameters import CParameters, CImageParameters
 
 
 def preprocessFrames(f_originalPath: str, f_targetPath: str) -> None:
     l_cameraImages = sorted([img for img in os.listdir(f_originalPath) if os.path.splitext(img)[1].lower() in [".jpg", ".jpeg", ".png"]])
     for filename in tqdm(l_cameraImages):
-        img = Image.open(os.path.join(f_originalPath, filename)).resize((CImageSize.WIDTH, CImageSize.HEIGHT), Image.NEAREST)
+        img = Image.open(os.path.join(f_originalPath, filename)).resize((CImageParameters.WIDTH, CImageParameters.HEIGHT), Image.NEAREST)
         img.save(os.path.join(f_targetPath, filename))
 
 
